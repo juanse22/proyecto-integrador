@@ -23,10 +23,22 @@ public class Pago {
         panel1.setBorder(new EmptyBorder(20, 20, 20, 20));
         frame.setContentPane(panel1);
 
+        // Agregar el ícono
+        String iconPath = "C:\\Users\\Juan Sebastian\\IdeaProjects\\Proyecto-Integrador\\src\\1811.png_860.png";
+        ImageIcon icon = new ImageIcon(iconPath);
+        frame.setIconImage(icon.getImage());
+
+        // Agregar el logo AREMI.png
+        String logoPath = "C:\\Users\\Juan Sebastian\\IdeaProjects\\Proyecto-Integrador\\src\\AREMI.png";
+        ImageIcon logoIcon = new ImageIcon(logoPath);
+        Image logoImage = logoIcon.getImage().getScaledInstance(100, 100, Image.SCALE_SMOOTH);
+        JLabel logoLabel = new JLabel(new ImageIcon(logoImage));
+        panel1.add(logoLabel, BorderLayout.NORTH);
+
         JLabel titleLabel = new JLabel("Seleccione un método de pago", SwingConstants.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 18));
         titleLabel.setForeground(new Color(219, 112, 147)); // Rosa oscuro
-        panel1.add(titleLabel, BorderLayout.NORTH);
+        panel1.add(titleLabel, BorderLayout.CENTER);
 
         JPanel radioPanel = new JPanel(new GridLayout(3, 1, 10, 10));
         radioPanel.setBackground(new Color(255, 224, 224)); // Rosa suave

@@ -45,7 +45,7 @@ public class Facturas {
             documento.add(new Paragraph("Valor de la venta: " + valorVenta));
             documento.add(new Paragraph("Nombre del Vendedor: " + nombreVendedor));
 
-            String rutaImagen = "C:\\Users\\Juan Sebastian\\IdeaProjects\\Proyecto-Integrador\\src\\simple.jpg";
+            String rutaImagen = "C:\\Users\\Juan Sebastian\\IdeaProjects\\Proyecto-Integrador\\src\\AREMI.png";
             Image imagenLogo = Image.getInstance(rutaImagen);
             imagenLogo.scaleToFit(100, 100);
             imagenLogo.setAlignment(Image.ALIGN_RIGHT);
