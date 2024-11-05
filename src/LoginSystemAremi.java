@@ -1,4 +1,278 @@
-package PACKAGE_NAME;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.KeyEvent;
+import java.sql.*;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 
-public class LoginSystemAremi  {
+public class LoginSystemAremi extends JDialog {
+    private JPanel contentPane;
+    private JTextField usuarioTextField;
+    private JPasswordField passwordField;
+    private JButton loginButton;
+    private JButton limpiarButton;
+    private JLabel logoLabel;
+
+    private static final String DB_URL = "jdbc:mysql://127.0.0.1:3306/salon_aremi";
+    private static final String DB_USER = "root";
+    private static final String DB_PASSWORD = "missgarro234";
+
+    // Definimos colores personalizados
+    private static final Color ROSA_CLARO = new Color(255, 182, 193);
+    private static final Color ROSA_OSCURO = new Color(219, 112, 147);
+    private static final Color MORADO_SUAVE = new Color(230, 190, 255);
+
+    public LoginSystemAremi() {
+        setTitle("Salón de Belleza AREMI - Login");
+        initComponents();
+        setupListeners();
+    }
+
+    private void initComponents() {
+        contentPane = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                GradientPaint gradient = new GradientPaint(
+                        0, 0, ROSA_CLARO,
+                        0, getHeight(), MORADO_SUAVE
+                );
+                ((Graphics2D) g).setPaint(gradient);
+                g.fillRect(0, 0, getWidth(), getHeight());
+            }
+        };
+        contentPane.setLayout(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(10, 15, 10, 15);
+
+        // Configuración de la ventana
+        setSize(500, 600);
+        setLocationRelativeTo(null);
+        setModal(true);
+        setResizable(false);
+
+        // Cargar y mostrar el logo
+        try {
+            ImageIcon icon = new ImageIcon("C:\\Users\\Juan Sebastian\\IdeaProjects\\Proyecto-Integrador\\src\\AREMI.png");
+            Image img = icon.getImage().getScaledInstance(200, 200, Image.SCALE_SMOOTH);
+            logoLabel = new JLabel(new ImageIcon(img));
+            setIconImage(icon.getImage());
+        } catch (Exception e) {
+            logoLabel = new JLabel("AREMI");
+            logoLabel.setFont(new Font("Arial", Font.BOLD, 28));
+            System.out.println("Error al cargar el logo: " + e.getMessage());
+        }
+
+        // Panel principal con margen y efecto de transparencia
+        JPanel mainPanel = new JPanel();
+        mainPanel.setLayout(new GridBagLayout());
+        mainPanel.setBackground(new Color(255, 255, 255, 200)); // Aumentamos la opacidad
+        mainPanel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(ROSA_OSCURO, 1),
+                BorderFactory.createEmptyBorder(20, 30, 20, 30)
+        ));
+
+        // Agregar componentes
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.gridwidth = 2;
+        gbc.anchor = GridBagConstraints.CENTER;
+        mainPanel.add(logoLabel, gbc);
+
+        // Estilo para las etiquetas
+        Font labelFont = new Font("Segoe UI", Font.BOLD, 14);
+        JLabel usuarioLabel = new JLabel("Usuario:");
+        JLabel passwordLabel = new JLabel("Contraseña:");
+        usuarioLabel.setFont(labelFont);
+        passwordLabel.setFont(labelFont);
+        usuarioLabel.setForeground(ROSA_OSCURO);
+        passwordLabel.setForeground(ROSA_OSCURO);
+
+        gbc.gridy = 1;
+        gbc.gridwidth = 1;
+        gbc.insets = new Insets(20, 5, 5, 5);
+        mainPanel.add(usuarioLabel, gbc);
+
+        usuarioTextField = new JTextField(20);
+        usuarioTextField.setPreferredSize(new Dimension(200, 30));
+        usuarioTextField.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(ROSA_OSCURO),
+                BorderFactory.createEmptyBorder(2, 5, 2, 5)
+        ));
+        gbc.gridx = 1;
+        mainPanel.add(usuarioTextField, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        mainPanel.add(passwordLabel, gbc);
+
+        passwordField = new JPasswordField(20);
+        passwordField.setPreferredSize(new Dimension(200, 30));
+        passwordField.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(ROSA_OSCURO),
+                BorderFactory.createEmptyBorder(2, 5, 2, 5)
+        ));
+        gbc.gridx = 1;
+        mainPanel.add(passwordField, gbc);
+
+        // Crear botones personalizados
+        loginButton = new JButton("Iniciar Sesión") {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                if (getModel().isPressed()) {
+                    g2.setColor(MORADO_SUAVE.darker());
+                } else if (getModel().isRollover()) {
+                    g2.setColor(MORADO_SUAVE);
+                } else {
+                    g2.setColor(ROSA_OSCURO);
+                }
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 10, 10);
+                g2.dispose();
+                super.paintComponent(g);
+            }
+        };
+
+        limpiarButton = new JButton("Limpiar") {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                if (getModel().isPressed()) {
+                    g2.setColor(MORADO_SUAVE.darker());
+                } else if (getModel().isRollover()) {
+                    g2.setColor(MORADO_SUAVE);
+                } else {
+                    g2.setColor(ROSA_OSCURO);
+                }
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 10, 10);
+                g2.dispose();
+                super.paintComponent(g);
+            }
+        };
+
+        // Panel para botones
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 0));
+        buttonPanel.setOpaque(false);
+
+        // Configurar estilo de botones
+        for (JButton button : new JButton[]{loginButton, limpiarButton}) {
+            button.setPreferredSize(new Dimension(130, 35));
+            button.setForeground(Color.WHITE);
+            button.setFont(new Font("Segoe UI", Font.BOLD, 14));
+            button.setFocusPainted(false);
+            button.setContentAreaFilled(false); // Importante para el pintado personalizado
+            button.setBorderPainted(false);     // Importante para el pintado personalizado
+            button.setOpaque(false);            // Importante para el pintado personalizado
+            button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        }
+
+        buttonPanel.add(loginButton);
+        buttonPanel.add(limpiarButton);
+
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        gbc.gridwidth = 2;
+        gbc.insets = new Insets(25, 5, 5, 5);
+        mainPanel.add(buttonPanel, gbc);
+
+        // Agregar el panel principal al contentPane
+        contentPane.add(mainPanel);
+        setContentPane(contentPane);
+    }
+
+    private void setupListeners() {
+        loginButton.addActionListener(e -> verificarLogin());
+        limpiarButton.addActionListener(e -> limpiarCampos());
+
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+
+        contentPane.registerKeyboardAction(
+                e -> dispose(),
+                KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
+                JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT
+        );
+
+        Action loginAction = new AbstractAction() {
+            @Override
+            public void actionPerformed(java.awt.event.ActionEvent e) {
+                verificarLogin();
+            }
+        };
+
+        usuarioTextField.addActionListener(loginAction);
+        passwordField.addActionListener(loginAction);
+    }
+
+    private void verificarLogin() {
+        String usuario = usuarioTextField.getText();
+        String password = new String(passwordField.getPassword());
+
+        if (usuario.isEmpty() || password.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Por favor, ingrese usuario y contraseña.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        String hashedPassword = hashPassword(password);
+
+        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement("SELECT * FROM usuarios WHERE username = ? AND password = ?")) {
+
+            stmt.setString(1, usuario);
+            stmt.setString(2, hashedPassword);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    String rol = rs.getString("rol");
+                    loginExitoso(rol);
+                } else {
+                    JOptionPane.showMessageDialog(this, "Usuario o contraseña incorrectos.", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Error al conectar con la base de datos.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private String hashPassword(String password) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            byte[] hash = md.digest(password.getBytes());
+            return Base64.getEncoder().encodeToString(hash);
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private void loginExitoso(String rol) {
+        JOptionPane.showMessageDialog(this, "Inicio de sesión exitoso. Rol: " + rol, "Éxito", JOptionPane.INFORMATION_MESSAGE);
+        dispose();
+    }
+
+    private void limpiarCampos() {
+        usuarioTextField.setText("");
+        passwordField.setText("");
+        usuarioTextField.requestFocus();
+    }
+
+    public static void main(String[] args) {
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            UIManager.put("OptionPane.background", new Color(255, 255, 255));
+            UIManager.put("Panel.background", new Color(255, 255, 255));
+            UIManager.put("OptionPane.messageForeground", ROSA_OSCURO);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        SwingUtilities.invokeLater(() -> {
+            LoginSystemAremi dialog = new LoginSystemAremi();
+            dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+            dialog.setVisible(true);
+        });
+    }
 }
