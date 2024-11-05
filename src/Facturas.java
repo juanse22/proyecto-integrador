@@ -5,9 +5,9 @@ import java.io.IOException;
 import java.sql.*;
 
 public class Facturas {
-    Connection conexion;
-    PreparedStatement preparar;
-    ResultSet resultado;
+    private static final String DB_URL = "jdbc:mysql://127.0.0.1:3306/salon_aremi";
+    private static final String DB_USER = "root";
+    private static final String DB_PASSWORD = "missgarro234";
 
     public Facturas() {
         conectar();
@@ -15,21 +15,25 @@ public class Facturas {
 
     public void conectar() {
         try {
-            conexion = DriverManager.getConnection(
-                    "jdbc:mysql://127.0.0.1:3306/?user=root",
-                    "root",
-                    "missgarro234"
-            );
+            Connection conexion = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+            if (conexion != null) {
+                System.out.println("Conexión exitosa a la base de datos.");
+            }
         } catch (SQLException e) {
-            System.out.println("Error al conectar con la base datos: " + e.getMessage());
+            System.out.println("Error al conectar con la base de datos: " + e.getMessage());
         }
     }
 
     public void generarFactura(String factura) {
-        try {
-            String usuario = obtenerNombreUsuario(factura);
-            String valorVenta = obtenerValorVenta(factura);
-            String nombreVendedor = obtenerNombreVendedor(factura);
+        try (Connection conexion = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+            String usuario = obtenerNombreUsuario(conexion, factura);
+            String valorVenta = obtenerValorVenta(conexion, factura);
+            String nombreVendedor = obtenerNombreVendedor(conexion, factura);
+
+            if (usuario == null || valorVenta == null || nombreVendedor == null) {
+                System.out.println("No se pudo obtener la información completa de la factura.");
+                return;
+            }
 
             Document documento = new Document();
             PdfWriter.getInstance(documento, new FileOutputStream("Factura.pdf"));
@@ -41,27 +45,27 @@ public class Facturas {
             documento.add(new Paragraph("Valor de la venta: " + valorVenta));
             documento.add(new Paragraph("Nombre del Vendedor: " + nombreVendedor));
 
-            Image imagenLogo = Image.getInstance("simple.jpg");
+            String rutaImagen = "C:\\Users\\Juan Sebastian\\IdeaProjects\\Proyecto-Integrador\\src\\simple.jpg";
+            Image imagenLogo = Image.getInstance(rutaImagen);
             imagenLogo.scaleToFit(100, 100);
             imagenLogo.setAlignment(Image.ALIGN_RIGHT);
             documento.add(imagenLogo);
 
             documento.close();
             System.out.println("La factura se ha generado y guardado en Factura.pdf");
-        } catch (DocumentException | IOException e) {
+        } catch (DocumentException | IOException | SQLException e) {
             System.out.println("Error al generar el certificado: " + e.getMessage());
         }
     }
 
-    String obtenerNombreUsuario(String factura) {
+    private String obtenerNombreUsuario(Connection conexion, String factura) {
         String usuario = null;
-        try {
-            String sql = "select usuario from facturas where id_factura=?";
-            preparar = conexion.prepareStatement(sql);
+        try (PreparedStatement preparar = conexion.prepareStatement("SELECT usuario FROM facturas WHERE id_factura=?")) {
             preparar.setString(1, factura);
-            resultado = preparar.executeQuery();
-            if (resultado.next()) {
-                usuario = resultado.getString("usuario");
+            try (ResultSet resultado = preparar.executeQuery()) {
+                if (resultado.next()) {
+                    usuario = resultado.getString("usuario");
+                }
             }
         } catch (SQLException e) {
             System.out.println("Error al obtener el nombre de usuario: " + e.getMessage());
@@ -69,15 +73,14 @@ public class Facturas {
         return usuario;
     }
 
-    String obtenerValorVenta(String factura) {
+    private String obtenerValorVenta(Connection conexion, String factura) {
         String valorVenta = null;
-        try {
-            String sql = "select valor_venta from facturas where id_factura=?";
-            preparar = conexion.prepareStatement(sql);
+        try (PreparedStatement preparar = conexion.prepareStatement("SELECT valor_venta FROM facturas WHERE id_factura=?")) {
             preparar.setString(1, factura);
-            resultado = preparar.executeQuery();
-            if (resultado.next()) {
-                valorVenta = resultado.getString("valor_venta");
+            try (ResultSet resultado = preparar.executeQuery()) {
+                if (resultado.next()) {
+                    valorVenta = resultado.getString("valor_venta");
+                }
             }
         } catch (SQLException e) {
             System.out.println("Error al obtener el valor de la venta: " + e.getMessage());
@@ -85,15 +88,14 @@ public class Facturas {
         return valorVenta;
     }
 
-    String obtenerNombreVendedor(String factura) {
+    private String obtenerNombreVendedor(Connection conexion, String factura) {
         String nombreVendedor = null;
-        try {
-            String sql = "select nombre_vendedor from facturas where id_factura=?";
-            preparar = conexion.prepareStatement(sql);
+        try (PreparedStatement preparar = conexion.prepareStatement("SELECT nombre_vendedor FROM facturas WHERE id_factura=?")) {
             preparar.setString(1, factura);
-            resultado = preparar.executeQuery();
-            if (resultado.next()) {
-                nombreVendedor = resultado.getString("nombre_vendedor");
+            try (ResultSet resultado = preparar.executeQuery()) {
+                if (resultado.next()) {
+                    nombreVendedor = resultado.getString("nombre_vendedor");
+                }
             }
         } catch (SQLException e) {
             System.out.println("Error al obtener el nombre del vendedor: " + e.getMessage());
@@ -103,6 +105,6 @@ public class Facturas {
 
     public static void main(String[] args) {
         Facturas factura1 = new Facturas();
-        factura1.generarFactura("1002");
+        factura1.generarFactura("1"); // Asegúrate de que el ID exista en la base de datos
     }
 }

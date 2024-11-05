@@ -1,4 +1,6 @@
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -12,15 +14,41 @@ public class Pago {
 
     public Pago() {
         JFrame frame = new JFrame("Pago");
-        frame.setContentPane(panel1);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(400, 300);
+        frame.setLocationRelativeTo(null);
 
-        // Agrupar los radio buttons
+        panel1 = new JPanel();
+        panel1.setBackground(new Color(255, 224, 224)); // Rosa suave
+        panel1.setBorder(new EmptyBorder(20, 20, 20, 20));
+        frame.setContentPane(panel1);
+
+        JLabel titleLabel = new JLabel("Seleccione un método de pago", SwingConstants.CENTER);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 18));
+        titleLabel.setForeground(new Color(219, 112, 147)); // Rosa oscuro
+        panel1.add(titleLabel, BorderLayout.NORTH);
+
+        JPanel radioPanel = new JPanel(new GridLayout(3, 1, 10, 10));
+        radioPanel.setBackground(new Color(255, 224, 224)); // Rosa suave
+
         ButtonGroup grupo = new ButtonGroup();
         grupo.add(efectivoRadioButton);
         grupo.add(tarjetaDeCreditoDebitoRadioButton);
         grupo.add(tranferenciaRadioButton);
 
+        radioPanel.add(efectivoRadioButton);
+        radioPanel.add(tarjetaDeCreditoDebitoRadioButton);
+        radioPanel.add(tranferenciaRadioButton);
+
+        panel1.add(radioPanel, BorderLayout.CENTER);
+
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 20));
+        buttonPanel.setBackground(new Color(255, 224, 224)); // Rosa suave
+
+        regresarButton = new JButton("Regresar");
+        regresarButton.setBackground(new Color(219, 112, 147)); // Rosa oscuro
+        regresarButton.setForeground(Color.WHITE);
+        regresarButton.setFocusPainted(false);
         regresarButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -29,11 +57,16 @@ public class Pago {
             }
         });
 
+        pagarButton = new JButton("Pagar");
+        pagarButton.setBackground(new Color(219, 112, 147)); // Rosa oscuro
+        pagarButton.setForeground(Color.WHITE);
+        pagarButton.setFocusPainted(false);
         pagarButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (validarSeleccionPago()) {
-                    procesarPago(frame);
+                    PagoDetailsDialog dialog = new PagoDetailsDialog(frame);
+                    dialog.setVisible(true);
                 } else {
                     JOptionPane.showMessageDialog(frame,
                             "Por favor seleccione un método de pago",
@@ -43,8 +76,11 @@ public class Pago {
             }
         });
 
-        frame.pack();
-        frame.setLocationRelativeTo(null);
+        buttonPanel.add(regresarButton);
+        buttonPanel.add(pagarButton);
+
+        panel1.add(buttonPanel, BorderLayout.SOUTH);
+
         frame.setVisible(true);
     }
 
@@ -52,13 +88,6 @@ public class Pago {
         return efectivoRadioButton.isSelected() ||
                 tarjetaDeCreditoDebitoRadioButton.isSelected() ||
                 tranferenciaRadioButton.isSelected();
-    }
-
-    private void procesarPago(JFrame frame) {
-        Facturas facturas = new Facturas();
-        facturas.generarFactura("1002"); // Aquí deberías pasar el ID real
-        JOptionPane.showMessageDialog(frame, "Pago procesado correctamente!");
-        frame.dispose();
     }
 
     public static void main(String[] args) {
