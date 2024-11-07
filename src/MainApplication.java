@@ -1,5 +1,5 @@
 import javax.swing.*;
-import java.awt.BorderLayout;  // Agregamos este import
+import java.awt.*;
 
 public class MainApplication {
     public static void main(String[] args) {
@@ -8,24 +8,64 @@ public class MainApplication {
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
             // Crear el panel principal que contendrá todo
-            JPanel mainPanel = new JPanel(new BorderLayout());
+            JPanel mainPanel = new JPanel(new BorderLayout()) {
+                @Override
+                protected void paintComponent(Graphics g) {
+                    super.paintComponent(g);
+                    Image img = new ImageIcon("C:\\Users\\Juan Sebastian\\IdeaProjects\\proyectoIntegrador\\src\\6911600.jpg").getImage();
+                    g.drawImage(img, 0, 0, getWidth(), getHeight(), this);
+                }
+            };
 
-            // Crear una barra de menú
-            JMenuBar menuBar = new JMenuBar();
-            JMenu menuOpciones = new JMenu("Opciones");
+            // Crear una barra de botones en la parte superior
+            JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+            topPanel.setOpaque(false);
 
-            // Crear items del menú
-            JMenuItem itemAgendarCita = new JMenuItem("Agendar Cita");
-            itemAgendarCita.addActionListener(e -> {
+            JButton btnLogin = new JButton("Login");
+            btnLogin.addActionListener(e -> {
+                new LoginSystemAremi().setVisible(true);
+            });
+
+            JButton btnAgendarCita = new JButton("Agendar Cita");
+            btnAgendarCita.addActionListener(e -> {
                 new AgendarCitaGUI().setVisible(true);
             });
 
-            // Agregar items al menú
-            menuOpciones.add(itemAgendarCita);
-            menuBar.add(menuOpciones);
+            JButton btnGestionClientes = new JButton("Gestión de Clientes");
+            btnGestionClientes.addActionListener(e -> {
+                new InterfazClientes().setVisible(true);
+            });
+
+            topPanel.add(btnLogin);
+            topPanel.add(btnAgendarCita);
+            topPanel.add(btnGestionClientes);
+
+            // Crear una barra de botones en la parte inferior
+            JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+            bottomPanel.setOpaque(false);
+
+            JButton btnPago = new JButton("Pago");
+            btnPago.addActionListener(e -> {
+                new Pago();
+            });
+
+            JButton btnGenerarFactura = new JButton("Generar Factura");
+            btnGenerarFactura.addActionListener(e -> {
+                String facturaId = JOptionPane.showInputDialog(frame, "Ingrese el ID de la factura:");
+                if (facturaId != null && !facturaId.isEmpty()) {
+                    Facturas facturas = new Facturas();
+                    facturas.generarFactura(facturaId);
+                }
+            });
+
+            bottomPanel.add(btnPago);
+            bottomPanel.add(btnGenerarFactura);
+
+            // Agregar los paneles al mainPanel
+            mainPanel.add(topPanel, BorderLayout.NORTH);
+            mainPanel.add(bottomPanel, BorderLayout.SOUTH);
 
             // Configurar la ventana principal
-            frame.setJMenuBar(menuBar);
             frame.setSize(800, 600);
             frame.setLocationRelativeTo(null);
             frame.add(mainPanel);
