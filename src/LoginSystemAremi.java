@@ -4,7 +4,6 @@ import java.awt.event.KeyEvent;
 import java.sql.*;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Base64;
 
 public class LoginSystemAremi extends JDialog {
     private JPanel contentPane;
@@ -54,7 +53,7 @@ public class LoginSystemAremi extends JDialog {
 
         // Cargar y mostrar el logo
         try {
-            ImageIcon icon = new ImageIcon("C:\\Users\\Juan Sebastian\\IdeaProjects\\Proyecto-Integrador\\src\\AREMI.png");
+            ImageIcon icon = new ImageIcon("src/AREMI.png");
             Image img = icon.getImage().getScaledInstance(200, 200, Image.SCALE_SMOOTH);
             logoLabel = new JLabel(new ImageIcon(img));
             setIconImage(icon.getImage());
@@ -67,7 +66,7 @@ public class LoginSystemAremi extends JDialog {
         // Panel principal con margen y efecto de transparencia
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new GridBagLayout());
-        mainPanel.setBackground(new Color(255, 255, 255, 200)); // Aumentamos la opacidad
+        mainPanel.setBackground(new Color(255, 255, 255, 200));
         mainPanel.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(ROSA_OSCURO, 1),
                 BorderFactory.createEmptyBorder(20, 30, 20, 30)
@@ -163,9 +162,9 @@ public class LoginSystemAremi extends JDialog {
             button.setForeground(Color.WHITE);
             button.setFont(new Font("Segoe UI", Font.BOLD, 14));
             button.setFocusPainted(false);
-            button.setContentAreaFilled(false); // Importante para el pintado personalizado
-            button.setBorderPainted(false);     // Importante para el pintado personalizado
-            button.setOpaque(false);            // Importante para el pintado personalizado
+            button.setContentAreaFilled(false);
+            button.setBorderPainted(false);
+            button.setOpaque(false);
             button.setCursor(new Cursor(Cursor.HAND_CURSOR));
         }
 
@@ -178,7 +177,6 @@ public class LoginSystemAremi extends JDialog {
         gbc.insets = new Insets(25, 5, 5, 5);
         mainPanel.add(buttonPanel, gbc);
 
-        // Agregar el panel principal al contentPane
         contentPane.add(mainPanel);
         setContentPane(contentPane);
     }
@@ -207,8 +205,8 @@ public class LoginSystemAremi extends JDialog {
     }
 
     private void verificarLogin() {
-        String usuario = usuarioTextField.getText();
-        String password = new String(passwordField.getPassword());
+        String usuario = usuarioTextField.getText().trim();
+        String password = new String(passwordField.getPassword()).trim();
 
         if (usuario.isEmpty() || password.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Por favor, ingrese usuario y contraseña.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -216,40 +214,74 @@ public class LoginSystemAremi extends JDialog {
         }
 
         String hashedPassword = hashPassword(password);
+        System.out.println("Debug Login:");
+        System.out.println("Usuario: " + usuario);
+        System.out.println("Contraseña sin hash: " + password);
+        System.out.println("Contraseña con hash: " + hashedPassword);
 
-        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
-             PreparedStatement stmt = conn.prepareStatement("SELECT * FROM usuarios WHERE username = ? AND password = ?")) {
+        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+            String query = "SELECT password, rol, nombre_completo FROM usuarios WHERE username = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(query)) {
+                stmt.setString(1, usuario);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        String storedHash = rs.getString("password");
+                        String rol = rs.getString("rol");
+                        String nombreCompleto = rs.getString("nombre_completo");
+                        System.out.println("Hash almacenado en BD: " + storedHash);
 
-            stmt.setString(1, usuario);
-            stmt.setString(2, hashedPassword);
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    String rol = rs.getString("rol");
-                    loginExitoso(rol);
-                } else {
-                    JOptionPane.showMessageDialog(this, "Usuario o contraseña incorrectos.", "Error", JOptionPane.ERROR_MESSAGE);
+                        if (hashedPassword.equals(storedHash)) {
+                            loginExitoso(rol, nombreCompleto);
+                        } else {
+                            System.out.println("Hash no coincide:");
+                            System.out.println("Hash generado: " + hashedPassword);
+                            System.out.println("Hash en BD: " + storedHash);
+                            JOptionPane.showMessageDialog(this,
+                                    "Contraseña incorrecta.",
+                                    "Error",
+                                    JOptionPane.ERROR_MESSAGE);
+                        }
+                    } else {
+                        JOptionPane.showMessageDialog(this,
+                                "Usuario no encontrado.",
+                                "Error",
+                                JOptionPane.ERROR_MESSAGE);
+                    }
                 }
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            JOptionPane.showMessageDialog(this, "Error al conectar con la base de datos.", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this,
+                    "Error de conexión: " + e.getMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
         }
     }
 
     private String hashPassword(String password) {
         try {
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            byte[] hash = md.digest(password.getBytes());
-            return Base64.getEncoder().encodeToString(hash);
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(password.getBytes());
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : hash) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) {
+                    hexString.append('0');
+                }
+                hexString.append(hex);
+            }
+            return hexString.toString();
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
             return null;
         }
     }
 
-    private void loginExitoso(String rol) {
-        JOptionPane.showMessageDialog(this, "Inicio de sesión exitoso. Rol: " + rol, "Éxito", JOptionPane.INFORMATION_MESSAGE);
+    private void loginExitoso(String rol, String nombreCompleto) {
+        JOptionPane.showMessageDialog(this,
+                "Bienvenido/a " + nombreCompleto + "!\nRol: " + rol,
+                "Login Exitoso",
+                JOptionPane.INFORMATION_MESSAGE);
         dispose();
     }
 
