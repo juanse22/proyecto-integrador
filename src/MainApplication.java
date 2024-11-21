@@ -5,68 +5,70 @@ import java.util.List;
 public class MainApplication {
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            JFrame frame = new JFrame("Sistema de Gestión de Spa");
-            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            // Mostrar el diálogo de inicio de sesión primero
+            LoginSystemAremi loginDialog = new LoginSystemAremi();
+            loginDialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+            loginDialog.setVisible(true);
 
-            // Crear el panel principal que contendrá todo
-            JPanel mainPanel = new JPanel(new BorderLayout()) {
-                @Override
-                protected void paintComponent(Graphics g) {
-                    super.paintComponent(g);
-                    Image img = new ImageIcon("C:\\Users\\Juan Sebastian\\IdeaProjects\\Proyecto-Integrador\\src\\6911600.jpg").getImage();
-                    g.drawImage(img, 0, 0, getWidth(), getHeight(), this);
-                }
-            };
+            // Si el inicio de sesión es exitoso, se mostrará la ventana principal
+            if (loginDialog.isLoginSuccessful()) {
+                JFrame frame = new JFrame("Sistema de Gestión de Spa");
+                frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-            // Crear una barra de botones en la parte superior
-            JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-            topPanel.setOpaque(false);
+                // Crear el panel principal que contendrá todo
+                JPanel mainPanel = new JPanel(new BorderLayout()) {
+                    @Override
+                    protected void paintComponent(Graphics g) {
+                        super.paintComponent(g);
+                        Image img = new ImageIcon("C:\\Users\\Juan Sebastian\\IdeaProjects\\Proyecto-Integrador\\src\\6911600.jpg").getImage();
+                        g.drawImage(img, 0, 0, getWidth(), getHeight(), this);
+                    }
+                };
 
-            JButton btnLogin = new JButton("Login");
-            btnLogin.addActionListener(e -> {
-                new LoginSystemAremi().setVisible(true);
-            });
+                // Crear una barra de botones en la parte superior
+                JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+                topPanel.setOpaque(false);
 
-            JButton btnAgendarCita = new JButton("Agendar Cita");
-            btnAgendarCita.addActionListener(e -> {
-                new AgendarCitaGUI().setVisible(true);
-            });
+                JButton btnAgendarCita = new JButton("Agendar Cita");
+                btnAgendarCita.addActionListener(e -> {
+                    new AgendarCitaGUI().setVisible(true);
+                });
 
-            JButton btnGestionClientes = new JButton("Gestión de Clientes");
-            btnGestionClientes.addActionListener(e -> {
-                new InterfazClientes().setVisible(true);
-            });
+                JButton btnGestionClientes = new JButton("Gestión de Clientes");
+                btnGestionClientes.addActionListener(e -> {
+                    new InterfazClientes().setVisible(true);
+                });
 
-            topPanel.add(btnLogin);
-            topPanel.add(btnAgendarCita);
-            topPanel.add(btnGestionClientes);
+                topPanel.add(btnAgendarCita);
+                topPanel.add(btnGestionClientes);
 
-            // Crear una barra de botones en la parte inferior
-            JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-            bottomPanel.setOpaque(false);
+                // Crear una barra de botones en la parte inferior
+                JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+                bottomPanel.setOpaque(false);
 
-            JButton btnPago = new JButton("Pago");
-            btnPago.addActionListener(e -> {
-                new Pago();
-            });
+                JButton btnPago = new JButton("Pago");
+                btnPago.addActionListener(e -> {
+                    new Pago();
+                });
 
-            JButton btnGenerarFactura = new JButton("Generar Factura");
-            btnGenerarFactura.addActionListener(e -> {
-                mostrarDialogoFactura(frame);
-            });
+                JButton btnGenerarFactura = new JButton("Generar Factura");
+                btnGenerarFactura.addActionListener(e -> {
+                    mostrarDialogoFactura(frame);
+                });
 
-            bottomPanel.add(btnPago);
-            bottomPanel.add(btnGenerarFactura);
+                bottomPanel.add(btnPago);
+                bottomPanel.add(btnGenerarFactura);
 
-            // Agregar los paneles al mainPanel
-            mainPanel.add(topPanel, BorderLayout.NORTH);
-            mainPanel.add(bottomPanel, BorderLayout.SOUTH);
+                // Agregar los paneles al mainPanel
+                mainPanel.add(topPanel, BorderLayout.NORTH);
+                mainPanel.add(bottomPanel, BorderLayout.SOUTH);
 
-            // Configurar la ventana principal
-            frame.setSize(800, 600);
-            frame.setLocationRelativeTo(null);
-            frame.add(mainPanel);
-            frame.setVisible(true);
+                // Configurar la ventana principal
+                frame.setSize(800, 600);
+                frame.setLocationRelativeTo(null);
+                frame.add(mainPanel);
+                frame.setVisible(true);
+            }
         });
     }
 

@@ -18,7 +18,7 @@ public class Pago {
         frame.setSize(400, 300);
         frame.setLocationRelativeTo(null);
 
-        panel1 = new JPanel();
+        panel1 = new JPanel(new BorderLayout()); // Usar BorderLayout para panel1
         panel1.setBackground(new Color(255, 224, 224)); // Rosa suave
         panel1.setBorder(new EmptyBorder(20, 20, 20, 20));
         frame.setContentPane(panel1);
@@ -38,7 +38,7 @@ public class Pago {
         JLabel titleLabel = new JLabel("Seleccione un método de pago", SwingConstants.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 18));
         titleLabel.setForeground(new Color(219, 112, 147)); // Rosa oscuro
-        panel1.add(titleLabel, BorderLayout.CENTER);
+        panel1.add(titleLabel, BorderLayout.NORTH);
 
         JPanel radioPanel = new JPanel(new GridLayout(3, 1, 10, 10));
         radioPanel.setBackground(new Color(255, 224, 224)); // Rosa suave
@@ -47,6 +47,10 @@ public class Pago {
         grupo.add(efectivoRadioButton);
         grupo.add(tarjetaDeCreditoDebitoRadioButton);
         grupo.add(tranferenciaRadioButton);
+
+        efectivoRadioButton = new JRadioButton("Efectivo");
+        tarjetaDeCreditoDebitoRadioButton = new JRadioButton("Tarjeta de Crédito/Débito");
+        tranferenciaRadioButton = new JRadioButton("Transferencia");
 
         radioPanel.add(efectivoRadioButton);
         radioPanel.add(tarjetaDeCreditoDebitoRadioButton);

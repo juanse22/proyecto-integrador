@@ -17,6 +17,8 @@ public class LoginSystemAremi extends JDialog {
     private static final String DB_USER = "root";
     private static final String DB_PASSWORD = "missgarro234";
 
+    private boolean loginSuccessful = false;
+
     // Definimos colores personalizados
     private static final Color ROSA_CLARO = new Color(255, 182, 193);
     private static final Color ROSA_OSCURO = new Color(219, 112, 147);
@@ -41,9 +43,7 @@ public class LoginSystemAremi extends JDialog {
                 g.fillRect(0, 0, getWidth(), getHeight());
             }
         };
-        contentPane.setLayout(new GridBagLayout());
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(10, 15, 10, 15);
+        contentPane.setLayout(new BorderLayout());
 
         // Configuración de la ventana
         setSize(500, 600);
@@ -71,6 +71,9 @@ public class LoginSystemAremi extends JDialog {
                 BorderFactory.createLineBorder(ROSA_OSCURO, 1),
                 BorderFactory.createEmptyBorder(20, 30, 20, 30)
         ));
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(10, 15, 10, 15);
 
         // Agregar componentes
         gbc.gridx = 0;
@@ -177,7 +180,7 @@ public class LoginSystemAremi extends JDialog {
         gbc.insets = new Insets(25, 5, 5, 5);
         mainPanel.add(buttonPanel, gbc);
 
-        contentPane.add(mainPanel);
+        contentPane.add(mainPanel, BorderLayout.CENTER);
         setContentPane(contentPane);
     }
 
@@ -282,6 +285,7 @@ public class LoginSystemAremi extends JDialog {
                 "Bienvenido/a " + nombreCompleto + "!\nRol: " + rol,
                 "Login Exitoso",
                 JOptionPane.INFORMATION_MESSAGE);
+        loginSuccessful = true;
         dispose();
     }
 
@@ -289,6 +293,10 @@ public class LoginSystemAremi extends JDialog {
         usuarioTextField.setText("");
         passwordField.setText("");
         usuarioTextField.requestFocus();
+    }
+
+    public boolean isLoginSuccessful() {
+        return loginSuccessful;
     }
 
     public static void main(String[] args) {
