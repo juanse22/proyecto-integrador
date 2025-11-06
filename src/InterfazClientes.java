@@ -15,6 +15,7 @@ public class InterfazClientes extends JFrame {
     private JList<String> listaClientes;
     private JTextField nombreField, direccionField, telefonoField;
     private int clienteSeleccionadoId = -1;
+    private java.util.ArrayList<Integer> clienteIds = new java.util.ArrayList<>();
 
     public InterfazClientes() {
         setTitle("Gestión de Clientes");
@@ -136,6 +137,7 @@ public class InterfazClientes extends JFrame {
                     int id = generatedKeys.getInt(1);
                     Cliente cliente = new Cliente(nombre, direccion, telefono);
                     listModel.addElement(cliente.toString());
+                    clienteIds.add(id);
                     limpiarCampos();
                 }
             } catch (SQLException e) {
@@ -187,7 +189,9 @@ public class InterfazClientes extends JFrame {
                 preparedStatement.setInt(1, clienteSeleccionadoId);
                 preparedStatement.executeUpdate();
 
-                listModel.remove(listaClientes.getSelectedIndex());
+                int selectedIndex = listaClientes.getSelectedIndex();
+                listModel.remove(selectedIndex);
+                clienteIds.remove(selectedIndex);
                 limpiarCampos();
                 clienteSeleccionadoId = -1;
             } catch (SQLException e) {
@@ -200,17 +204,21 @@ public class InterfazClientes extends JFrame {
     }
 
     private void cargarClientes() {
+        listModel.clear();
+        clienteIds.clear();
         try {
             String query = "SELECT * FROM clientes";
             PreparedStatement preparedStatement = connection.prepareStatement(query);
             ResultSet resultSet = preparedStatement.executeQuery();
 
             while (resultSet.next()) {
+                int id = resultSet.getInt("id");
                 String nombre = resultSet.getString("nombre");
                 String direccion = resultSet.getString("direccion");
                 String telefono = resultSet.getString("telefono");
                 Cliente cliente = new Cliente(nombre, direccion, telefono);
                 listModel.addElement(cliente.toString());
+                clienteIds.add(id);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -219,21 +227,24 @@ public class InterfazClientes extends JFrame {
     }
 
     private void cargarClienteSeleccionado(int index) {
-        try {
-            String query = "SELECT * FROM clientes WHERE id = ?";
-            PreparedStatement preparedStatement = connection.prepareStatement(query);
-            preparedStatement.setInt(1, index + 1);
-            ResultSet resultSet = preparedStatement.executeQuery();
+        if (index >= 0 && index < clienteIds.size()) {
+            int realId = clienteIds.get(index);
+            try {
+                String query = "SELECT * FROM clientes WHERE id = ?";
+                PreparedStatement preparedStatement = connection.prepareStatement(query);
+                preparedStatement.setInt(1, realId);
+                ResultSet resultSet = preparedStatement.executeQuery();
 
-            if (resultSet.next()) {
-                nombreField.setText(resultSet.getString("nombre"));
-                direccionField.setText(resultSet.getString("direccion"));
-                telefonoField.setText(resultSet.getString("telefono"));
-                clienteSeleccionadoId = resultSet.getInt("id");
+                if (resultSet.next()) {
+                    nombreField.setText(resultSet.getString("nombre"));
+                    direccionField.setText(resultSet.getString("direccion"));
+                    telefonoField.setText(resultSet.getString("telefono"));
+                    clienteSeleccionadoId = resultSet.getInt("id");
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+                JOptionPane.showMessageDialog(this, "Error al cargar el cliente seleccionado.");
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(this, "Error al cargar el cliente seleccionado.");
         }
     }
 

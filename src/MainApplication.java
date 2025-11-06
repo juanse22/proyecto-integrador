@@ -12,7 +12,7 @@ public class MainApplication {
 
             // Si el inicio de sesión es exitoso, se mostrará la ventana principal
             if (loginDialog.isLoginSuccessful()) {
-                JFrame frame = new JFrame("Sistema de Gestión de Spa");
+                JFrame frame = new JFrame("Sistema de Gestión de Spa - Salón Aremi");
                 frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
                 // Crear el panel principal que contendrá todo
@@ -26,7 +26,7 @@ public class MainApplication {
                 };
 
                 // Crear una barra de botones en la parte superior
-                JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+                JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
                 topPanel.setOpaque(false);
 
                 JButton btnAgendarCita = new JButton("Agendar Cita");
@@ -34,16 +34,46 @@ public class MainApplication {
                     new AgendarCitaGUI().setVisible(true);
                 });
 
-                JButton btnGestionClientes = new JButton("Gestión de Clientes");
+                JButton btnGestionClientes = new JButton("Gestion de Clientes");
                 btnGestionClientes.addActionListener(e -> {
                     new InterfazClientes().setVisible(true);
                 });
 
+                // Botón de Inventario (solo para administradores)
+                JButton btnInventario = new JButton("Inventario");
+                btnInventario.addActionListener(e -> {
+                    if (SeguridadManager.tienePermiso("gestionar_inventario")) {
+                        new InventarioGUI().setVisible(true);
+                    } else {
+                        JOptionPane.showMessageDialog(frame,
+                            "No tiene permisos para acceder al inventario",
+                            "Acceso Denegado",
+                            JOptionPane.WARNING_MESSAGE);
+                    }
+                });
+
+                // Botón de Nómina (solo para administradores)
+                JButton btnNomina = new JButton("Nomina");
+                btnNomina.addActionListener(e -> {
+                    if (SeguridadManager.tienePermiso("ver_nomina")) {
+                        new NominaGUI().setVisible(true);
+                    } else {
+                        JOptionPane.showMessageDialog(frame,
+                            "No tiene permisos para ver la nomina",
+                            "Acceso Denegado",
+                            JOptionPane.WARNING_MESSAGE);
+                    }
+                });
+
                 topPanel.add(btnAgendarCita);
                 topPanel.add(btnGestionClientes);
+                topPanel.add(btnInventario);
+                topPanel.add(btnNomina);
+
+                // Los botones estan siempre habilitados, la validacion se hace al hacer clic
 
                 // Crear una barra de botones en la parte inferior
-                JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+                JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
                 bottomPanel.setOpaque(false);
 
                 JButton btnPago = new JButton("Pago");
@@ -64,10 +94,18 @@ public class MainApplication {
                 mainPanel.add(bottomPanel, BorderLayout.SOUTH);
 
                 // Configurar la ventana principal
-                frame.setSize(800, 600);
+                frame.setSize(900, 650);
                 frame.setLocationRelativeTo(null);
                 frame.add(mainPanel);
                 frame.setVisible(true);
+
+                // Cerrar sesión al cerrar la aplicación
+                frame.addWindowListener(new java.awt.event.WindowAdapter() {
+                    @Override
+                    public void windowClosing(java.awt.event.WindowEvent e) {
+                        SeguridadManager.cerrarSesion();
+                    }
+                });
             }
         });
     }

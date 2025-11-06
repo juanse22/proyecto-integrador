@@ -281,6 +281,9 @@ public class LoginSystemAremi extends JDialog {
     }
 
     private void loginExitoso(String rol, String nombreCompleto) {
+        // Establecer sesión en SeguridadManager
+        SeguridadManager.setUsuarioActual(nombreCompleto, rol);
+
         JOptionPane.showMessageDialog(this,
                 "Bienvenido/a " + nombreCompleto + "!\nRol: " + rol,
                 "Login Exitoso",
