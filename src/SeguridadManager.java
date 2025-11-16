@@ -95,7 +95,7 @@ public class SeguridadManager {
 
     /**
      * Verifica si el usuario tiene permisos para una acción específica
-     * @param accion Acción a verificar (ej: "gestionar_inventario", "ver_nomina")
+     * @param accion Acción a verificar (ej: "ver_nomina", "gestionar_usuarios")
      * @return true si tiene permiso
      */
     public static boolean tienePermiso(String accion) {
@@ -110,7 +110,6 @@ public class SeguridadManager {
             case "registrar_servicio":
             case "registrar_pago":
                 return true;
-            case "gestionar_inventario":
             case "ver_nomina":
             case "gestionar_usuarios":
             case "ver_reportes_financieros":

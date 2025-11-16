@@ -260,19 +260,19 @@ public class NominaGUI extends JFrame {
     private void actualizarResumen(int totalServicios, double totalComisiones,
                                    double totalSalarios, int mes, int ano) {
         StringBuilder resumen = new StringBuilder();
-        resumen.append("╔══════════════════════════════════════════════════════╗\n");
-        resumen.append(String.format("║  RESUMEN DE NÓMINA - %s %d%n",
+        resumen.append("========================================================\n");
+        resumen.append(String.format("  RESUMEN DE NOMINA - %s %d%n",
             cboMes.getSelectedItem(), ano));
-        resumen.append("╠══════════════════════════════════════════════════════╣\n");
-        resumen.append(String.format("║  Total de Empleadas:        %-5d%n",
+        resumen.append("========================================================\n");
+        resumen.append(String.format("  Total de Empleadas:        %-5d%n",
             modeloTabla.getRowCount()));
-        resumen.append(String.format("║  Total de Servicios:        %-5d%n",
+        resumen.append(String.format("  Total de Servicios:        %-5d%n",
             totalServicios));
-        resumen.append(String.format("║  Total en Comisiones:       $%,.2f%n",
+        resumen.append(String.format("  Total en Comisiones:       $%,.2f%n",
             totalComisiones));
-        resumen.append(String.format("║  Total Nómina a Pagar:      $%,.2f%n",
+        resumen.append(String.format("  Total Nomina a Pagar:      $%,.2f%n",
             totalSalarios));
-        resumen.append("╚══════════════════════════════════════════════════════╝\n");
+        resumen.append("========================================================\n");
 
         txtResumen.setText(resumen.toString());
     }

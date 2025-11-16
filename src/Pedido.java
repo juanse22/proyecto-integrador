@@ -14,7 +14,7 @@ public class Pedido extends JFrame {
         setTitle("Gestión de Pedidos - Salón de Belleza");
         setSize(800, 600);
         setLocationRelativeTo(null);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
         // Crear y configurar el panel principal
         panel1 = new JPanel(new BorderLayout());

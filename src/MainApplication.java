@@ -3,6 +3,9 @@ import java.awt.*;
 import java.util.List;
 
 public class MainApplication {
+    // Imagen de fondo cargada una sola vez (optimización de rendimiento)
+    private static Image backgroundImage = null;
+
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             // Mostrar el diálogo de inicio de sesión primero
@@ -15,13 +18,24 @@ public class MainApplication {
                 JFrame frame = new JFrame("Sistema de Gestión de Spa - Salón Aremi");
                 frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
+                // Cargar imagen de fondo UNA SOLA VEZ
+                if (backgroundImage == null) {
+                    try {
+                        backgroundImage = new ImageIcon("C:\\Users\\Juan Sebastian\\IdeaProjects\\Proyecto-Integrador\\src\\6911600.jpg").getImage();
+                    } catch (Exception e) {
+                        System.err.println("Error cargando imagen de fondo: " + e.getMessage());
+                    }
+                }
+
                 // Crear el panel principal que contendrá todo
+                final Image bgImage = backgroundImage; // Variable final para uso en clase anónima
                 JPanel mainPanel = new JPanel(new BorderLayout()) {
                     @Override
                     protected void paintComponent(Graphics g) {
                         super.paintComponent(g);
-                        Image img = new ImageIcon("C:\\Users\\Juan Sebastian\\IdeaProjects\\Proyecto-Integrador\\src\\6911600.jpg").getImage();
-                        g.drawImage(img, 0, 0, getWidth(), getHeight(), this);
+                        if (bgImage != null) {
+                            g.drawImage(bgImage, 0, 0, getWidth(), getHeight(), this);
+                        }
                     }
                 };
 
@@ -39,19 +53,6 @@ public class MainApplication {
                     new InterfazClientes().setVisible(true);
                 });
 
-                // Botón de Inventario (solo para administradores)
-                JButton btnInventario = new JButton("Inventario");
-                btnInventario.addActionListener(e -> {
-                    if (SeguridadManager.tienePermiso("gestionar_inventario")) {
-                        new InventarioGUI().setVisible(true);
-                    } else {
-                        JOptionPane.showMessageDialog(frame,
-                            "No tiene permisos para acceder al inventario",
-                            "Acceso Denegado",
-                            JOptionPane.WARNING_MESSAGE);
-                    }
-                });
-
                 // Botón de Nómina (solo para administradores)
                 JButton btnNomina = new JButton("Nomina");
                 btnNomina.addActionListener(e -> {
@@ -67,7 +68,6 @@ public class MainApplication {
 
                 topPanel.add(btnAgendarCita);
                 topPanel.add(btnGestionClientes);
-                topPanel.add(btnInventario);
                 topPanel.add(btnNomina);
 
                 // Los botones estan siempre habilitados, la validacion se hace al hacer clic

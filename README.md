@@ -1,7 +1,7 @@
 # Sistema de Gestión para Salón de Belleza AREMI
 
 ## Descripción del Proyecto
-Sistema completo de gestión empresarial (ERP) desarrollado en Java para administrar las operaciones del Salón de Belleza Aremi. Incluye gestión de clientes, citas, servicios, inventario, pagos, facturación y nómina.
+Sistema completo de gestión empresarial (ERP) desarrollado en Java para administrar las operaciones del Salón de Belleza Aremi. Incluye gestión de clientes, citas, servicios, pagos, facturación y nómina.
 
 **Versión:** 2.0
 **Lenguaje:** Java
@@ -50,35 +50,7 @@ Sistema completo de gestión empresarial (ERP) desarrollado en Java para adminis
 - `Servicio.java` - Modelo de servicios
 - `SalonBelleza.java` - Registro y resumen financiero
 
-### 5. Sistema de Inventario ⭐ NUEVO
-- Registro completo de productos: nombre, cantidad, proveedor, costo, precio venta
-- **Alertas inteligentes:**
-  - Stock bajo (cuando cantidad ≤ stock mínimo)
-  - Productos próximos a vencer (dentro de 30 días)
-  - Productos vencidos
-- Categorización de productos (Tintes, Esmaltes, Cremas, etc.)
-- Cálculo automático de márgenes de ganancia
-- Búsqueda y filtrado en tiempo real
-- **Acceso:** Solo administradores
-
-**Archivos:**
-- `ItemInventario.java` - Modelo con lógica de alertas
-- `InventarioGUI.java` - Interfaz completa de gestión
-
-**Funcionalidades:**
-```java
-// Ejemplo de uso del modelo
-ItemInventario item = new ItemInventario(...);
-if (item.tieneStockBajo()) {
-    // Alerta de stock
-}
-if (item.estaProximoAVencer()) {
-    // Alerta de vencimiento
-}
-double margen = item.calcularMargenGanancia(); // Calcula margen %
-```
-
-### 6. Sistema de Nómina ⭐ NUEVO
+### 5. Sistema de Nómina ⭐ NUEVO
 - Cálculo automático de comisiones por empleada (20% de servicios)
 - Configuración de salario base y bonificaciones
 - Reportes mensuales detallados
@@ -100,7 +72,7 @@ double margen = item.calcularMargenGanancia(); // Calcula margen %
   - Total a pagar
 - Exportación de reportes a consola
 
-### 7. Sistema de Pagos y Facturación
+### 6. Sistema de Pagos y Facturación
 - Múltiples métodos de pago: efectivo, tarjeta, transferencia
 - Generación de facturas en PDF con logo
 - Búsqueda de facturas por nombre o teléfono
@@ -111,7 +83,7 @@ double margen = item.calcularMargenGanancia(); // Calcula margen %
 - `Facturas.java` - Generación de facturas PDF
 - `PagoDetailsDialog.java` - Detalles de pago
 
-### 8. Gestión de Gastos
+### 7. Gestión de Gastos
 - Registro de gastos operacionales
 - Seguimiento por concepto y fecha
 - Cálculo de beneficio neto (ingresos - gastos)
@@ -123,18 +95,9 @@ double margen = item.calcularMargenGanancia(); // Calcula margen %
 
 ## Pruebas Unitarias ⭐ NUEVO
 
-El proyecto incluye pruebas JUnit para validar la lógica de negocio:
+El proyecto incluye pruebas para validar la lógica de negocio:
 
-### ItemInventarioTest.java
-Valida:
-- ✓ Detección de stock bajo
-- ✓ Detección de productos próximos a vencer
-- ✓ Detección de productos vencidos
-- ✓ Cálculo de margen de ganancia
-- ✓ Cálculo de valor total de stock
-- ✓ Estados del producto (NORMAL, STOCK BAJO, PRÓXIMO A VENCER, VENCIDO)
-
-### SeguridadManagerTest.java
+### TestSeguridad.java
 Valida:
 - ✓ Generación de hash SHA-256
 - ✓ Autenticación de administradores
@@ -144,9 +107,7 @@ Valida:
 
 **Ejecutar pruebas:**
 ```bash
-# Requiere JUnit 4 en el classpath
-java -cp .:junit-4.12.jar:hamcrest-core-1.3.jar org.junit.runner.JUnitCore ItemInventarioTest
-java -cp .:junit-4.12.jar:hamcrest-core-1.3.jar org.junit.runner.JUnitCore SeguridadManagerTest
+java TestSeguridad
 ```
 
 ---
@@ -165,13 +126,11 @@ Proyecto-Integrador/
 │   ├── Usuario.java                  # Modelo de usuario
 │   ├── Servicio.java                 # Modelo de servicio
 │   ├── Gasto.java                    # Modelo de gasto
-│   ├── ItemInventario.java           # ⭐ Modelo de inventario con alertas
 │   │
 │   ├── # Interfaces Gráficas
 │   ├── AgendarCitaGUI.java           # GUI de agenda de citas
 │   ├── InterfazClientes.java         # GUI de gestión de clientes
 │   ├── SalonBelleza.java             # GUI de servicios y gastos
-│   ├── InventarioGUI.java            # ⭐ GUI de gestión de inventario
 │   ├── NominaGUI.java                # ⭐ GUI de gestión de nómina
 │   ├── Pago.java                     # GUI de pagos
 │   ├── PagoDetailsDialog.java        # Diálogo de detalles de pago
@@ -181,8 +140,7 @@ Proyecto-Integrador/
 │   ├── Facturas.java                 # Generación de facturas PDF
 │   │
 │   └── # Pruebas
-│       ├── ItemInventarioTest.java   # ⭐ Tests de inventario
-│       └── SeguridadManagerTest.java # ⭐ Tests de seguridad
+│       └── TestSeguridad.java        # ⭐ Tests de seguridad
 │
 ├── lib/                              # Librerías externas (MySQL, iText)
 ├── out/                              # Archivos compilados
@@ -238,20 +196,6 @@ CREATE TABLE citas (
     servicio VARCHAR(100),
     fecha DATE,
     hora VARCHAR(10)
-);
-
--- Tabla de inventario ⭐ NUEVA
-CREATE TABLE inventario (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    nombre VARCHAR(100) NOT NULL,
-    cantidad INT NOT NULL,
-    proveedor VARCHAR(100),
-    fecha_vencimiento DATE,
-    costo DECIMAL(10,2) NOT NULL,
-    precio_venta DECIMAL(10,2) NOT NULL,
-    stock_minimo INT DEFAULT 5,
-    categoria VARCHAR(50),
-    fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Tabla de facturas
@@ -339,7 +283,7 @@ java -cp "out:lib/*" MainApplication
 **Empleado:**
 - Usuario: `empleada1`
 - Contraseña: `emp123`
-- Permisos: Citas, clientes, servicios, pagos (sin inventario ni nómina)
+- Permisos: Citas, clientes, servicios, pagos (sin nómina)
 
 ---
 
@@ -351,7 +295,6 @@ java -cp "out:lib/*" MainApplication
 ✓ Registrar servicios
 ✓ Registrar pagos
 ✓ Generar facturas
-✓ **Gestionar inventario**
 ✓ **Ver nómina y reportes**
 ✓ **Gestionar usuarios**
 
@@ -361,45 +304,12 @@ java -cp "out:lib/*" MainApplication
 ✓ Registrar servicios
 ✓ Registrar pagos
 ✓ Generar facturas
-❌ Gestionar inventario
 ❌ Ver nómina y reportes
 ❌ Gestionar usuarios
 
 ---
 
 ## Funcionalidades Clave
-
-### Sistema de Alertas del Inventario
-El módulo de inventario incluye un sistema inteligente de alertas:
-
-**Alertas de Stock:**
-- Se activa cuando `cantidad <= stock_minimo`
-- Aparece en la columna "Estado" de la tabla
-- Botón especial "Ver Alertas" muestra resumen
-
-**Alertas de Vencimiento:**
-- **Próximo a vencer:** Productos que vencen en ≤ 30 días
-- **Vencido:** Productos con fecha de vencimiento pasada
-- Cálculo automático de días restantes
-
-**Ejemplo de uso:**
-```java
-ItemInventario tinte = new ItemInventario(
-    "Tinte Rubio", 3, "Proveedor XYZ",
-    LocalDate.now().plusDays(15),
-    50000, 80000, 10, "Tintes"
-);
-
-if (tinte.tieneStockBajo()) {
-    System.out.println("⚠ Stock bajo! Ordenar más");
-}
-
-if (tinte.estaProximoAVencer()) {
-    System.out.println("⚠ Producto próximo a vencer");
-}
-
-String estado = tinte.getEstado(); // "STOCK BAJO" o "PRÓXIMO A VENCER"
-```
 
 ### Cálculo de Nómina
 El sistema calcula automáticamente:
@@ -450,11 +360,10 @@ Cada módulo maneja su propia conexión pero usando las mismas credenciales:
 ## Mejoras Implementadas (Versión 2.0)
 
 ### ✨ Nuevas Funcionalidades
-1. **Sistema de Inventario completo** con alertas inteligentes
-2. **Sistema de Nómina** con reportes detallados
-3. **Control de acceso por roles** centralizado
-4. **Pruebas unitarias** con JUnit
-5. **Integración completa** en menú principal
+1. **Sistema de Nómina** con reportes detallados
+2. **Control de acceso por roles** centralizado
+3. **Pruebas de seguridad** automatizadas
+4. **Integración completa** en menú principal
 
 ### 🔒 Seguridad
 - Hash SHA-256 para contraseñas (apropiado para proyecto académico)
@@ -463,7 +372,6 @@ Cada módulo maneja su propia conexión pero usando las mismas credenciales:
 
 ### 📊 Reportes
 - Reportes de nómina por periodo
-- Alertas de inventario en tiempo real
 - Resumen financiero consolidado
 
 ---
@@ -537,7 +445,6 @@ Para reportar problemas o sugerencias:
 
 - **Contraseñas:** Se almacenan hasheadas con SHA-256
 - **Base de datos:** Configurar antes del primer uso
-- **Inventario:** Las alertas se calculan automáticamente
 - **Nómina:** Los porcentajes son configurables en la interfaz
 - **Roles:** Los permisos están definidos en `SeguridadManager.java`
 

@@ -17,7 +17,7 @@ public class Administrador {
     public static void main(String[] args) {
         JFrame frame = new JFrame("Administrador");
         frame.setContentPane(new Administrador().getPanel1()); // Cargar el JPanel
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // Configuración de cierre
+        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); // Configuración de cierre
         frame.pack(); // Ajustar el tamaño de la ventana
         frame.setVisible(true); // Hacer visible la ventana
     }

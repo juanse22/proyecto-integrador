@@ -69,8 +69,7 @@ public class TestSeguridad {
         SeguridadManager.cerrarSesion();
         SeguridadManager.setUsuarioActual("admin", SeguridadManager.ROL_ADMINISTRADOR);
 
-        boolean todosPermisos = SeguridadManager.tienePermiso("gestionar_inventario") &&
-                                SeguridadManager.tienePermiso("ver_nomina") &&
+        boolean todosPermisos = SeguridadManager.tienePermiso("ver_nomina") &&
                                 SeguridadManager.tienePermiso("gestionar_usuarios") &&
                                 SeguridadManager.tienePermiso("agendar_cita");
 
@@ -89,7 +88,6 @@ public class TestSeguridad {
 
         boolean permisosCorrectos = SeguridadManager.tienePermiso("agendar_cita") &&
                                     SeguridadManager.tienePermiso("registrar_servicio") &&
-                                    !SeguridadManager.tienePermiso("gestionar_inventario") &&
                                     !SeguridadManager.tienePermiso("ver_nomina");
 
         if (permisosCorrectos) {

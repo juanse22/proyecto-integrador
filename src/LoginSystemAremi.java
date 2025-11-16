@@ -24,6 +24,10 @@ public class LoginSystemAremi extends JDialog {
     private static final Color ROSA_OSCURO = new Color(219, 112, 147);
     private static final Color MORADO_SUAVE = new Color(230, 190, 255);
 
+    // Cache de imágenes para optimización de rendimiento
+    private static ImageIcon logoIcon = null;
+    private static Image logoImageScaled = null;
+
     public LoginSystemAremi() {
         setTitle("Salón de Belleza AREMI - Login");
         initComponents();
@@ -51,16 +55,24 @@ public class LoginSystemAremi extends JDialog {
         setModal(true);
         setResizable(false);
 
-        // Cargar y mostrar el logo
-        try {
-            ImageIcon icon = new ImageIcon("src/AREMI.png");
-            Image img = icon.getImage().getScaledInstance(200, 200, Image.SCALE_SMOOTH);
-            logoLabel = new JLabel(new ImageIcon(img));
-            setIconImage(icon.getImage());
-        } catch (Exception e) {
+        // Cargar y mostrar el logo (con caché para optimización)
+        if (logoIcon == null || logoImageScaled == null) {
+            try {
+                logoIcon = new ImageIcon("src/AREMI.png");
+                logoImageScaled = logoIcon.getImage().getScaledInstance(200, 200, Image.SCALE_SMOOTH);
+            } catch (Exception e) {
+                System.out.println("Error al cargar el logo: " + e.getMessage());
+            }
+        }
+
+        if (logoImageScaled != null) {
+            logoLabel = new JLabel(new ImageIcon(logoImageScaled));
+            if (logoIcon != null) {
+                setIconImage(logoIcon.getImage());
+            }
+        } else {
             logoLabel = new JLabel("AREMI");
             logoLabel.setFont(new Font("Arial", Font.BOLD, 28));
-            System.out.println("Error al cargar el logo: " + e.getMessage());
         }
 
         // Panel principal con margen y efecto de transparencia

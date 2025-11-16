@@ -14,7 +14,7 @@ public class Pago {
 
     public Pago() {
         JFrame frame = new JFrame("Pago");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         frame.setSize(400, 300);
         frame.setLocationRelativeTo(null);
 

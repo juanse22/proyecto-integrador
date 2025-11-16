@@ -14,7 +14,7 @@ public class AgendarCitaGUI extends JFrame {
     public AgendarCitaGUI() {
         setTitle("💅 Agenda de Citas - Salón de Belleza");
         setSize(600, 500);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
 
         // Panel principal

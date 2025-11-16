@@ -20,7 +20,7 @@ public class InterfazClientes extends JFrame {
     public InterfazClientes() {
         setTitle("Gestión de Clientes");
         setSize(600, 400);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLayout(new BorderLayout());
 
         // Conectar a la base de datos
