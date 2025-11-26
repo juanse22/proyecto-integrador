@@ -35,7 +35,6 @@ public class NominaGUI extends JFrame {
     private static final String DB_PASSWORD = "missgarro234";
 
     // Configuración de nómina
-    private static final double COMISION_PORCENTAJE = 0.20; // 20%
     private static final double SALARIO_BASE_DEFAULT = 1300000; // Salario mínimo Colombia 2024
 
     public NominaGUI() {
@@ -139,8 +138,8 @@ public class NominaGUI extends JFrame {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(Color.WHITE);
 
-        String[] columnas = {"Empleada", "Servicios", "Ingresos Generados",
-                           "Comisión (20%)", "Salario Base", "Bonificación", "Total a Pagar"};
+        String[] columnas = {"Empleada", "Especialidad", "Servicios", "Ingresos",
+                           "% Comisión", "Comisión", "Salario Base", "Total a Pagar"};
         modeloTabla = new DefaultTableModel(columnas, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -202,11 +201,12 @@ public class NominaGUI extends JFrame {
         }
 
         // Consulta para obtener servicios por empleada en el mes seleccionado
-        String sql = "SELECT empleada, COUNT(*) as servicios, SUM(precio) as total_ingresos " +
-                    "FROM servicios " +
-                    "WHERE MONTH(STR_TO_DATE(fecha, '%d/%m/%Y')) = ? " +
-                    "AND YEAR(STR_TO_DATE(fecha, '%d/%m/%Y')) = ? " +
-                    "GROUP BY empleada";
+        String sql = "SELECT e.nombre as empleada, COUNT(*) as servicios, SUM(s.precio) as total_ingresos " +
+                    "FROM servicios s " +
+                    "INNER JOIN empleadas e ON s.empleada_id = e.id " +
+                    "WHERE MONTH(s.fecha) = ? " +
+                    "AND YEAR(s.fecha) = ? " +
+                    "GROUP BY e.nombre";
 
         Map<String, Double[]> datosNomina = new HashMap<>();
         double totalComisiones = 0;
@@ -223,17 +223,23 @@ public class NominaGUI extends JFrame {
                 String empleada = rs.getString("empleada");
                 int servicios = rs.getInt("servicios");
                 double ingresosGenerados = rs.getDouble("total_ingresos");
-                double comision = ingresosGenerados * COMISION_PORCENTAJE;
+
+                // Obtener comisión personalizada de SeguridadManager
+                double porcentajeComision = SeguridadManager.getComisionEmpleada(empleada);
+                String especialidad = SeguridadManager.getEspecialidadEmpleada(empleada);
+
+                double comision = ingresosGenerados * porcentajeComision;
                 double totalPagar = salarioBase + comision + bonificacion;
 
                 Object[] fila = {
                     empleada,
+                    especialidad,
                     servicios,
-                    String.format("$%,.2f", ingresosGenerados),
-                    String.format("$%,.2f", comision),
-                    String.format("$%,.2f", salarioBase),
-                    String.format("$%,.2f", bonificacion),
-                    String.format("$%,.2f", totalPagar)
+                    String.format("$%,.0f", ingresosGenerados),
+                    String.format("%.0f%%", porcentajeComision * 100),
+                    String.format("$%,.0f", comision),
+                    String.format("$%,.0f", salarioBase),
+                    String.format("$%,.0f", totalPagar)
                 };
 
                 modeloTabla.addRow(fila);
@@ -268,9 +274,9 @@ public class NominaGUI extends JFrame {
             modeloTabla.getRowCount()));
         resumen.append(String.format("  Total de Servicios:        %-5d%n",
             totalServicios));
-        resumen.append(String.format("  Total en Comisiones:       $%,.2f%n",
+        resumen.append(String.format("  Total en Comisiones:       $%,.0f%n",
             totalComisiones));
-        resumen.append(String.format("  Total Nomina a Pagar:      $%,.2f%n",
+        resumen.append(String.format("  Total Nomina a Pagar:      $%,.0f%n",
             totalSalarios));
         resumen.append("========================================================\n");
 
@@ -301,12 +307,13 @@ public class NominaGUI extends JFrame {
         for (int i = 0; i < modeloTabla.getRowCount(); i++) {
             reporte.append("----------------------------------------\n");
             reporte.append("Empleada: ").append(modeloTabla.getValueAt(i, 0)).append("\n");
-            reporte.append("  Servicios realizados: ").append(modeloTabla.getValueAt(i, 1)).append("\n");
-            reporte.append("  Ingresos generados:   ").append(modeloTabla.getValueAt(i, 2)).append("\n");
-            reporte.append("  Comisión (20%):       ").append(modeloTabla.getValueAt(i, 3)).append("\n");
-            reporte.append("  Salario base:         ").append(modeloTabla.getValueAt(i, 4)).append("\n");
-            reporte.append("  Bonificación:         ").append(modeloTabla.getValueAt(i, 5)).append("\n");
-            reporte.append("  TOTAL A PAGAR:        ").append(modeloTabla.getValueAt(i, 6)).append("\n");
+            reporte.append("  Especialidad:         ").append(modeloTabla.getValueAt(i, 1)).append("\n");
+            reporte.append("  Servicios realizados: ").append(modeloTabla.getValueAt(i, 2)).append("\n");
+            reporte.append("  Ingresos generados:   ").append(modeloTabla.getValueAt(i, 3)).append("\n");
+            reporte.append("  Porcentaje comisión:  ").append(modeloTabla.getValueAt(i, 4)).append("\n");
+            reporte.append("  Comisión:             ").append(modeloTabla.getValueAt(i, 5)).append("\n");
+            reporte.append("  Salario base:         ").append(modeloTabla.getValueAt(i, 6)).append("\n");
+            reporte.append("  TOTAL A PAGAR:        ").append(modeloTabla.getValueAt(i, 7)).append("\n");
         }
 
         reporte.append("\n").append(txtResumen.getText());

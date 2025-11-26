@@ -1,5 +1,7 @@
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Clase para gestionar la seguridad y control de acceso del sistema.
@@ -17,6 +19,25 @@ public class SeguridadManager {
     // Usuario actual en sesión (patrón Singleton simple)
     private static String usuarioActual = null;
     private static String rolActual = null;
+    private static String nombreCompletoActual = null;
+
+    // Configuración de comisiones por empleada
+    private static final Map<String, Double> COMISIONES_EMPLEADAS = new HashMap<>();
+    private static final Map<String, String> ESPECIALIDADES_EMPLEADAS = new HashMap<>();
+
+    static {
+        // Ashley: 20% - Uñas y Manicure
+        COMISIONES_EMPLEADAS.put("Ashley", 0.20);
+        ESPECIALIDADES_EMPLEADAS.put("Ashley", "Uñas y Manicure");
+
+        // Monika: 30% - Cejas
+        COMISIONES_EMPLEADAS.put("Monika", 0.30);
+        ESPECIALIDADES_EMPLEADAS.put("Monika", "Cejas");
+
+        // Veronika: 50% - Depilación
+        COMISIONES_EMPLEADAS.put("Veronika", 0.50);
+        ESPECIALIDADES_EMPLEADAS.put("Veronika", "Depilación");
+    }
 
     /**
      * Establece el usuario actual en sesión
@@ -24,6 +45,53 @@ public class SeguridadManager {
     public static void setUsuarioActual(String usuario, String rol) {
         usuarioActual = usuario;
         rolActual = rol;
+        nombreCompletoActual = usuario;
+    }
+
+    /**
+     * Establece el usuario actual en sesión con nombre completo
+     */
+    public static void setUsuarioActual(String usuario, String rol, String nombreCompleto) {
+        usuarioActual = usuario;
+        rolActual = rol;
+        nombreCompletoActual = nombreCompleto;
+    }
+
+    /**
+     * Obtiene el nombre completo del usuario actual
+     */
+    public static String getNombreCompletoActual() {
+        return nombreCompletoActual;
+    }
+
+    /**
+     * Obtiene el porcentaje de comisión de una empleada
+     */
+    public static double getComisionEmpleada(String nombreEmpleada) {
+        return COMISIONES_EMPLEADAS.getOrDefault(nombreEmpleada, 0.20);
+    }
+
+    /**
+     * Obtiene la especialidad de una empleada
+     */
+    public static String getEspecialidadEmpleada(String nombreEmpleada) {
+        return ESPECIALIDADES_EMPLEADAS.getOrDefault(nombreEmpleada, "General");
+    }
+
+    /**
+     * Obtiene el porcentaje de comisión del usuario actual
+     */
+    public static double getComisionActual() {
+        if (nombreCompletoActual == null) return 0.20;
+        return COMISIONES_EMPLEADAS.getOrDefault(nombreCompletoActual, 0.20);
+    }
+
+    /**
+     * Obtiene la especialidad del usuario actual
+     */
+    public static String getEspecialidadActual() {
+        if (nombreCompletoActual == null) return "General";
+        return ESPECIALIDADES_EMPLEADAS.getOrDefault(nombreCompletoActual, "General");
     }
 
     /**
@@ -67,6 +135,7 @@ public class SeguridadManager {
     public static void cerrarSesion() {
         usuarioActual = null;
         rolActual = null;
+        nombreCompletoActual = null;
     }
 
     /**

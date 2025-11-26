@@ -1,8 +1,14 @@
 import javax.swing.*;
 import java.awt.*;
+import java.sql.*;
+import java.time.LocalDate;
 import java.util.List;
 
 public class MainApplication {
+    // Conexión a base de datos
+    private static final String DB_URL = "jdbc:mysql://127.0.0.1:3306/salon_aremi";
+    private static final String DB_USER = "root";
+    private static final String DB_PASSWORD = "missgarro234";
     // Imagen de fondo cargada una sola vez (optimización de rendimiento)
     private static Image backgroundImage = null;
 
@@ -66,9 +72,23 @@ public class MainApplication {
                     }
                 });
 
+                // Botón Mi Saldo (para empleadas)
+                JButton btnMiSaldo = new JButton("Mi Saldo");
+                btnMiSaldo.addActionListener(e -> {
+                    if (SeguridadManager.esEmpleado()) {
+                        mostrarMiSaldo(frame);
+                    } else {
+                        JOptionPane.showMessageDialog(frame,
+                            "Esta opción es solo para empleadas.\nUse 'Nomina' para ver todos los saldos.",
+                            "Información",
+                            JOptionPane.INFORMATION_MESSAGE);
+                    }
+                });
+
                 topPanel.add(btnAgendarCita);
                 topPanel.add(btnGestionClientes);
                 topPanel.add(btnNomina);
+                topPanel.add(btnMiSaldo);
 
                 // Los botones estan siempre habilitados, la validacion se hace al hacer clic
 
@@ -190,5 +210,75 @@ public class MainApplication {
         dialog.setLocationRelativeTo(parent);
         dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
         dialog.setVisible(true);
+    }
+
+    /**
+     * Muestra el saldo y comisiones de la empleada actual
+     */
+    private static void mostrarMiSaldo(JFrame parent) {
+        String nombreEmpleada = SeguridadManager.getNombreCompletoActual();
+        String especialidad = SeguridadManager.getEspecialidadActual();
+        double porcentajeComision = SeguridadManager.getComisionActual();
+
+        int mesActual = LocalDate.now().getMonthValue();
+        int anoActual = LocalDate.now().getYear();
+
+        String sql = "SELECT COUNT(*) as servicios, COALESCE(SUM(s.precio), 0) as total_ingresos " +
+                    "FROM servicios s " +
+                    "INNER JOIN empleadas e ON s.empleada_id = e.id " +
+                    "WHERE e.nombre = ? " +
+                    "AND MONTH(s.fecha) = ? " +
+                    "AND YEAR(s.fecha) = ?";
+
+        try (Connection conexion = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+             PreparedStatement pstmt = conexion.prepareStatement(sql)) {
+
+            pstmt.setString(1, nombreEmpleada);
+            pstmt.setInt(2, mesActual);
+            pstmt.setInt(3, anoActual);
+
+            ResultSet rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                int servicios = rs.getInt("servicios");
+                double ingresos = rs.getDouble("total_ingresos");
+                double comision = ingresos * porcentajeComision;
+
+                String[] meses = {"Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+                                 "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"};
+
+                StringBuilder mensaje = new StringBuilder();
+                mensaje.append("═══════════════════════════════════════\n");
+                mensaje.append("         MI SALDO - ").append(meses[mesActual - 1]).append(" ").append(anoActual).append("\n");
+                mensaje.append("═══════════════════════════════════════\n\n");
+                mensaje.append("  Empleada: ").append(nombreEmpleada).append("\n");
+                mensaje.append("  Especialidad: ").append(especialidad).append("\n");
+                mensaje.append("  Porcentaje de comisión: ").append(String.format("%.0f%%", porcentajeComision * 100)).append("\n\n");
+                mensaje.append("  ─────────────────────────────────────\n");
+                mensaje.append("  Servicios realizados: ").append(servicios).append("\n");
+                mensaje.append("  Ingresos generados:   $").append(String.format("%,.2f", ingresos)).append("\n");
+                mensaje.append("  ─────────────────────────────────────\n");
+                mensaje.append("  COMISIÓN GANADA:      $").append(String.format("%,.2f", comision)).append("\n");
+                mensaje.append("═══════════════════════════════════════\n");
+
+                JTextArea textArea = new JTextArea(mensaje.toString());
+                textArea.setEditable(false);
+                textArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
+                textArea.setBackground(new Color(250, 250, 250));
+
+                JScrollPane scrollPane = new JScrollPane(textArea);
+                scrollPane.setPreferredSize(new Dimension(400, 350));
+
+                JOptionPane.showMessageDialog(parent, scrollPane,
+                    "Mi Saldo - " + nombreEmpleada,
+                    JOptionPane.INFORMATION_MESSAGE);
+            }
+
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(parent,
+                "Error al consultar saldo: " + e.getMessage(),
+                "Error", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+        }
     }
 }

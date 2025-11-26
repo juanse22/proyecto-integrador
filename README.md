@@ -149,6 +149,107 @@ Proyecto-Integrador/
 
 ---
 
+## Diagrama Entidad-Relación
+
+```mermaid
+erDiagram
+    USUARIOS {
+        varchar username PK
+        varchar password
+        varchar nombre_completo
+        varchar rol
+    }
+
+    CLIENTES {
+        int id PK
+        varchar nombre
+        varchar direccion
+        varchar telefono
+    }
+
+    EMPLEADOS {
+        int id PK
+        varchar nombre
+        varchar telefono
+        varchar especialidad
+        varchar username FK
+    }
+
+    SERVICIOS {
+        int id PK
+        varchar tipo
+        decimal precio
+        varchar fecha
+        int empleado_id FK
+        int cliente_id FK
+    }
+
+    CITAS {
+        int id PK
+        date fecha
+        varchar hora
+        varchar servicio_solicitado
+        int cliente_id FK
+        int empleado_id FK
+    }
+
+    FACTURAS {
+        varchar id_factura PK
+        decimal valor_venta
+        datetime fecha_venta
+        int cliente_id FK
+        int empleado_id FK
+    }
+
+    DETALLE_FACTURA {
+        int id PK
+        varchar id_factura FK
+        int servicio_id FK
+        int cantidad
+        decimal subtotal
+    }
+
+    NOMINA {
+        int id PK
+        int empleado_id FK
+        decimal salario_base
+        decimal comisiones
+        date periodo
+    }
+
+    %% Relaciones
+    USUARIOS ||--o| EMPLEADOS : "tiene"
+
+    CLIENTES ||--o{ CITAS : "agenda"
+    CLIENTES ||--o{ SERVICIOS : "recibe"
+    CLIENTES ||--o{ FACTURAS : "paga"
+
+    EMPLEADOS ||--o{ CITAS : "atiende"
+    EMPLEADOS ||--o{ SERVICIOS : "realiza"
+    EMPLEADOS ||--o{ FACTURAS : "genera"
+    EMPLEADOS ||--o{ NOMINA : "percibe"
+
+    FACTURAS ||--o{ DETALLE_FACTURA : "contiene"
+    SERVICIOS ||--o{ DETALLE_FACTURA : "incluido_en"
+```
+
+### Descripción de Relaciones
+
+| Relación | Cardinalidad | Descripción |
+|----------|--------------|-------------|
+| USUARIOS → EMPLEADOS | 1:0..1 | Un usuario puede ser un empleado |
+| CLIENTES → CITAS | 1:N | Un cliente agenda múltiples citas |
+| CLIENTES → SERVICIOS | 1:N | Un cliente recibe múltiples servicios |
+| CLIENTES → FACTURAS | 1:N | Un cliente tiene múltiples facturas |
+| EMPLEADOS → CITAS | 1:N | Un empleado atiende múltiples citas |
+| EMPLEADOS → SERVICIOS | 1:N | Un empleado realiza múltiples servicios |
+| EMPLEADOS → FACTURAS | 1:N | Un empleado genera múltiples facturas |
+| EMPLEADOS → NOMINA | 1:N | Un empleado tiene registros de nómina |
+| FACTURAS → DETALLE_FACTURA | 1:N | Una factura tiene múltiples detalles |
+| SERVICIOS → DETALLE_FACTURA | 1:N | Un servicio puede estar en múltiples facturas |
+
+---
+
 ## Configuración de Base de Datos
 
 ### Requisitos
